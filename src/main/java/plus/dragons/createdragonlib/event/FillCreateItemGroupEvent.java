@@ -11,14 +11,15 @@ import net.minecraft.world.level.ItemLike;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class FillCreateItemGroupEvent {
 
     public static class Inserter {
-        private final NonNullList<ItemStack> items;
+        private final Function<Item, ItemStack> items;
         private final Map<Item, List<ItemStack>> insertions = new IdentityHashMap<>();
 
-        public Inserter(NonNullList<ItemStack> items) {
+        public Inserter(Function<Item, ItemStack> items) {
             this.items = items;
         }
 
@@ -44,16 +45,17 @@ public class FillCreateItemGroupEvent {
 
 
         public void doneInsertion() {
-            ListIterator<ItemStack> it = items.listIterator();
-            while (it.hasNext()) {
-                Item item = it.next().getItem();
-                if (insertions.containsKey(item)) {
-                    for (var inserted : insertions.get(item)) {
-                        it.add(inserted);
-                    }
-                    insertions.remove(item);
-                }
-            }
+            //fixme
+//            ListIterator<ItemStack> it = items;
+//            while (it.hasNext()) {
+//                Item item = it.next().getItem();
+//                if (insertions.containsKey(item)) {
+//                    for (var inserted : insertions.get(item)) {
+//                        it.add(inserted);
+//                    }
+//                    insertions.remove(item);
+//                }
+//            }
         }
     }
 
