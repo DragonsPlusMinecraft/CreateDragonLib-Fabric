@@ -17,6 +17,7 @@ import net.minecraft.world.level.storage.DimensionDataStorage;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class AccumulativeTrigger extends SimpleCriterionTrigger<AccumulativeTrigger.TriggerInstance> {
 
@@ -28,9 +29,9 @@ public class AccumulativeTrigger extends SimpleCriterionTrigger<AccumulativeTrig
 
     @Override
     @NotNull
-    protected TriggerInstance createInstance(JsonObject pJson, @NotNull EntityPredicate.Composite pPlayer, @NotNull DeserializationContext pContext) {
+    protected TriggerInstance createInstance(JsonObject pJson, @NotNull ContextAwarePredicate player, @NotNull DeserializationContext pContext) {
         MinMaxBounds.Ints requirements = MinMaxBounds.Ints.fromJson(pJson.get("requirement"));
-        return new TriggerInstance(id, pPlayer, requirements);
+        return new TriggerInstance(id, player, requirements);
     }
 
     public void trigger(Player pPlayer, int change) {
@@ -93,8 +94,7 @@ public class AccumulativeTrigger extends SimpleCriterionTrigger<AccumulativeTrig
             return pCompoundTag;
         }
 
-        private record TriCell(ResourceLocation rl, UUID id, int i) {
-        }
+        private record TriCell(ResourceLocation rl, UUID id, int i) {}
     }
 
     private static AccumulativeData get(Level level) {
@@ -110,13 +110,13 @@ public class AccumulativeTrigger extends SimpleCriterionTrigger<AccumulativeTrig
     public static class TriggerInstance extends AbstractCriterionTriggerInstance {
         private final MinMaxBounds.Ints requirement;
 
-        public TriggerInstance(ResourceLocation pCriterion, EntityPredicate.Composite pPlayer, MinMaxBounds.Ints requirement) {
-            super(pCriterion, pPlayer);
+        public TriggerInstance(ResourceLocation pCriterion, ContextAwarePredicate player, MinMaxBounds.Ints requirement) {
+            super(pCriterion, player);
             this.requirement = requirement;
         }
 
         public boolean matches(ResourceLocation resourceLocation, Player player, int change) {
-            AccumulativeData data = get(player.level);
+            AccumulativeData data = get(player.level());
             data.change(resourceLocation, player.getUUID(), change);
             return requirement.matches(data.get(resourceLocation, player.getUUID()));
         }
