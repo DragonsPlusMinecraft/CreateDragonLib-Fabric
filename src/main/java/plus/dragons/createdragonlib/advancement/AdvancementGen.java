@@ -9,10 +9,11 @@ import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
+import plus.dragons.createdragonlib.mixin.DataGeneratorAccessor;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 @ApiStatus.Internal
@@ -28,32 +29,30 @@ class AdvancementGen implements DataProvider {
     }
 
     @Override
-    public void run(CachedOutput cache) {
-        Path path = this.generator.getOutputFolder();
-        Set<ResourceLocation> set = Sets.newHashSet();
-        Consumer<Advancement> consumer = advancement -> {
-            if (!set.add(advancement.getId()))
-                throw new IllegalStateException("Duplicate advancement " + advancement.getId());
-            Path advancementPath = path.resolve("data/"
-                    + advancement.getId().getNamespace() + "/advancements/"
-                    + advancement.getId().getPath() + ".json"
-            );
-            try {
+    public CompletableFuture<?> run(CachedOutput cache) {
+        Path path = ((DataGeneratorAccessor) this.generator).getRootOutputFolder();
+
+        return CompletableFuture.runAsync(() -> {
+            Set<ResourceLocation> set = Sets.newHashSet();
+            Consumer<Advancement> consumer = advancement -> {
+                if (!set.add(advancement.getId()))
+                    throw new IllegalStateException("Duplicate advancement " + advancement.getId());
+                Path advancementPath = path.resolve("data/"
+                        + advancement.getId().getNamespace() + "/advancements/"
+                        + advancement.getId().getPath() + ".json"
+                );
                 DataProvider.saveStable(cache, advancement.deconstruct().serializeToJson(), advancementPath);
-            } catch (IOException ioexception) {
-                LOGGER.error("Couldn't save advancement {}", advancementPath, ioexception);
-            }
-        };
-        var advancements = AdvancementHolder.ENTRIES_MAP.get(modid);
-        if (advancements != null)
-            for (var advancement : advancements) {
-                advancement.save(consumer);
-            }
+            };
+            var advancements = AdvancementHolder.ENTRIES_MAP.get(modid);
+            if (advancements != null)
+                for (var advancement : advancements) {
+                    advancement.save(consumer);
+                }
+        });
     }
 
     @Override
     public String getName() {
         return name + " Advancements";
     }
-
 }

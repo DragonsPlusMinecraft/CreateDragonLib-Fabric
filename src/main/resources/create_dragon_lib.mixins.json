@@ -8,11 +8,11 @@
     "CreateAdvancementConstructor",
     "CreateAdvancementMixin",
     "CreateItemGroupBaseMixin",
+    "DataGeneratorAccessor",
     "FluidReactionsMixin"
   ],
   "client": [
-    "FogRendererMixin",
-    "TextureAtlasMixin"
+    "FogRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

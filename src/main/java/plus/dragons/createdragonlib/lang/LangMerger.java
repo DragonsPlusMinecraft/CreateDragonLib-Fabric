@@ -19,6 +19,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
+import plus.dragons.createdragonlib.mixin.DataGeneratorAccessor;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.concurrent.CompletableFuture;
 
 /*
 MIT License
@@ -88,47 +90,56 @@ class LangMerger implements DataProvider {
     }
 
     @Override
-    public void run(CachedOutput cache) throws IOException {
-        Path path = this.dataGenerator.getOutputFolder()
+    public CompletableFuture<?> run(CachedOutput cache) {
+        Path path = ((DataGeneratorAccessor) this.dataGenerator).getRootOutputFolder()
                 .resolve("assets/" + modid + "/lang/" + "en_us.json");
 
-        for (Pair<String, JsonElement> pair : getAllLocalizationFiles()) {
-            if (!pair.getRight().isJsonObject())
-                continue;
-            Map<String, String> localizedEntries = new HashMap<>();
-            JsonObject jsonObject = pair.getRight().getAsJsonObject();
-            String langkKey = pair.getKey();
-            existingButActuallyMissingTranslationTally.put(langkKey, new MutableInt(0));
-            jsonObject.entrySet()
-                    .stream()
-                    .forEachOrdered(entry -> {
-                        String key = entry.getKey();
-                        if (key.startsWith("_"))
-                            return;
-                        String value = entry.getValue()
-                                .getAsString();
-                        if (value.startsWith("UNLOCALIZED: "))
-                            existingButActuallyMissingTranslationTally.get(langkKey).increment();
-                        localizedEntries.put(key, value);
-                    });
-            allLocalizedEntries.put(langkKey, localizedEntries);
-            populatedLangData.put(langkKey, new ArrayList<>());
-            missingTranslationTally.put(langkKey, new MutableInt(0));
-        }
 
-        collectExistingEntries(path);
-        collectEntries();
-        if (mergedLangData.isEmpty())
-            return;
+        return CompletableFuture.runAsync(() -> {
+            for(Pair<String, JsonElement> pair : getAllLocalizationFiles()) {
+                String langType = pair.getKey();
+                if(!pair.getRight().isJsonObject())
+                    continue;
+                Map<String, String> localizedEntries = new HashMap<>();
+                JsonObject jsonObject = pair.getRight().getAsJsonObject();
+                existingButActuallyMissingTranslationTally.put(langType, new MutableInt(0));
+                jsonObject.entrySet()
+                        .stream()
+                        .forEachOrdered(entry -> {
+                            String key = entry.getKey();
+                            if(key.startsWith("_"))
+                                return;
+                            String value = entry.getValue()
+                                    .getAsString();
+                            if(value.startsWith("UNLOCALIZED: "))
+                                existingButActuallyMissingTranslationTally.get(langType).increment();
+                            localizedEntries.put(key, value);
+                        });
+                allLocalizedEntries.put(langType, localizedEntries);
+                populatedLangData.put(langType, new ArrayList<>());
+                missingTranslationTally.put(langType, new MutableInt(0));
+            }
 
-        save(cache, mergedLangData, -1, path, "Merging en_us.json with hand-written lang entries...");
-        for (Entry<String, List<Object>> localization : populatedLangData.entrySet()) {
-            String key = localization.getKey();
-            Path populatedLangPath = this.dataGenerator.getOutputFolder()
-                    .resolve("assets/" + modid + "/lang/unfinished/" + key);
-            save(cache, localization.getValue(), missingTranslationTally.get(key).intValue() + existingButActuallyMissingTranslationTally.get(key).intValue(),
-                    populatedLangPath, "Populating " + key + " with missing entries...");
-        }
+            try{
+                collectExistingEntries(path);
+                collectEntries();
+                if(mergedLangData.isEmpty())
+                    return;
+
+                save(cache, mergedLangData, -1, path, "Merging en_us.json with hand-written lang entries...");
+                for(Entry<String, List<Object>> localization : populatedLangData.entrySet()) {
+                    String key = localization.getKey();
+                    Path populatedLangPath = ((DataGeneratorAccessor) this.dataGenerator).getRootOutputFolder()
+                            .resolve("assets/" + modid + "/lang/unfinished/" + key);
+                    save(cache, localization.getValue(),
+                            missingTranslationTally.get(key).intValue() + existingButActuallyMissingTranslationTally.get(key).intValue(),
+                            populatedLangPath, "Populating " + key + " with missing entries...");
+                }
+            } catch (IOException e){
+                LOGGER.error(e);
+            }
+
+        });
     }
 
     private boolean shouldIgnore(String key) {

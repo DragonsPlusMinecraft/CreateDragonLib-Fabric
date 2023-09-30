@@ -5,11 +5,13 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.foundation.gui.widget.Label;
 import com.simibubi.create.foundation.utility.Components;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 
 /**
@@ -104,7 +106,7 @@ public class ComponentLabel extends Label {
     }
 
     @Override
-    public void renderButton(@NotNull PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void renderButton(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         if (text == null)
             return;
         RenderSystem.setShaderColor(1, 1, 1, 1);
@@ -112,9 +114,8 @@ public class ComponentLabel extends Label {
                 ? text
                 : text.copy().append(suffix);
         if (hasShadow)
-            font.drawShadow(matrixStack, textToRender, x, y, color);
+            graphics.drawString(font, textToRender, mouseX, mouseY, color);
         else
-            font.draw(matrixStack, textToRender, x, y, color);
+            graphics.drawString(font, textToRender, mouseX, mouseY, color);
     }
-
 }

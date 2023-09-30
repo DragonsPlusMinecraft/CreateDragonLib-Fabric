@@ -3,6 +3,7 @@ package plus.dragons.createdragonlib.lang;
 import com.google.gson.JsonObject;
 import com.simibubi.create.foundation.ponder.PonderLocalization;
 import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
+import net.minecraft.data.PackOutput;
 import plus.dragons.createdragonlib.advancement.AdvancementHolder;
 
 import java.util.Collections;
@@ -27,7 +28,8 @@ public class LangFactory {
      */
     public void datagen(final FabricDataGenerator datagen) {
         langMerger.dataGenerator = datagen;
-        datagen.addProvider(langMerger);
+        FabricDataGenerator.Pack pack = datagen.createPack();
+        pack.addProvider((PackOutput output) -> langMerger);
     }
 
     /**

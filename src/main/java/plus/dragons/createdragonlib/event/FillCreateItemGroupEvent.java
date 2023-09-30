@@ -1,6 +1,6 @@
 package plus.dragons.createdragonlib.event;
 
-import com.simibubi.create.infrastructure.item.CreateCreativeModeTab;
+import com.simibubi.create.AllCreativeModeTabs;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.core.NonNullList;
@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 
 import java.util.*;
+import java.util.function.Function;
 
 public class FillCreateItemGroupEvent {
 
@@ -71,7 +72,7 @@ public class FillCreateItemGroupEvent {
                     return InteractionResult.PASS;
                 });
 
-        InteractionResult interact(CreateCreativeModeTab itemGroup, NonNullList<ItemStack> items);
+        InteractionResult interact(AllCreativeModeTabs itemGroup, Function<Item, ItemStack> items);
     }
 
 }
