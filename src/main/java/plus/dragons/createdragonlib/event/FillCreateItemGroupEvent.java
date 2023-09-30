@@ -72,7 +72,7 @@ public class FillCreateItemGroupEvent {
                     return InteractionResult.PASS;
                 });
 
-        InteractionResult interact(AllCreativeModeTabs itemGroup, Function<Item, ItemStack> items);
+        InteractionResult interact(AllCreativeModeTabs.TabInfo itemGroup, Function<Item, ItemStack> items);
     }
 
 }
