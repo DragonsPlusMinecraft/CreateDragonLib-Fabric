@@ -8,6 +8,6 @@ repositories {
 }
 
 dependencies {
-    implementation fg.deobf("plus.dragons.createdragonlib:create_dragon_lib-${minecraft_version}:${create_dragon_lib_version}")
+    modImplementation("plus.dragons.createdragonlib:create_dragon_lib-${minecraft_version}:${create_dragon_lib_version}")
 }
 ```
