@@ -29,7 +29,7 @@ public abstract class CreateItemGroupBaseMixin implements CreativeModeTab.Displa
                 .CallBack
                 .EVENT
                 .invoker()
-                .interact((AllCreativeModeTabs.TabInfo) (Object) this, items);
+                .interact((AllCreativeModeTabs.TabInfo) (Object) this, output);
         outputAll(item, output, items, stackFunc);
     }
 }

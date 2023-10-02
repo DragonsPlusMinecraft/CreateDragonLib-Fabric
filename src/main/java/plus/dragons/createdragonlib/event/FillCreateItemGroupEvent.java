@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 public class FillCreateItemGroupEvent {
 
     public static class Inserter {
-        private final Function<Item, ItemStack> items;
+        private final List<Item> items;
         private final Map<Item, List<ItemStack>> insertions = new IdentityHashMap<>();
 
-        public Inserter(Function<Item, ItemStack> items) {
+        public Inserter(List<Item> items) {
             this.items = items;
         }
 
@@ -45,17 +45,16 @@ public class FillCreateItemGroupEvent {
 
 
         public void doneInsertion() {
-            //fixme
-//            ListIterator<ItemStack> it = items;
-//            while (it.hasNext()) {
-//                Item item = it.next().getItem();
-//                if (insertions.containsKey(item)) {
-//                    for (var inserted : insertions.get(item)) {
-//                        it.add(inserted);
-//                    }
-//                    insertions.remove(item);
-//                }
-//            }
+            ListIterator<Item> it = items.listIterator();
+            while (it.hasNext()) {
+                Item item = it.next();
+                if (insertions.containsKey(item)) {
+                    for (var inserted : insertions.get(item)) {
+                        it.add(inserted.getItem());
+                    }
+                    insertions.remove(item);
+                }
+            }
         }
     }
 
@@ -74,7 +73,7 @@ public class FillCreateItemGroupEvent {
                     return InteractionResult.PASS;
                 });
 
-        InteractionResult interact(AllCreativeModeTabs.TabInfo itemGroup, Function<Item, ItemStack> items);
+        InteractionResult interact(AllCreativeModeTabs.TabInfo itemGroup, List<Item> items);
     }
 
 }
