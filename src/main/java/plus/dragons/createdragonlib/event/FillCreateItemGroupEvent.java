@@ -75,7 +75,7 @@ public class FillCreateItemGroupEvent {
                     return InteractionResult.PASS;
                 });
 
-        InteractionResult interact(CreativeModeTab itemGroup, List<Item> items);
+        InteractionResult interact(AllCreativeModeTabs.TabInfo itemGroup, List<Item> items);
     }
 
 }

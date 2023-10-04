@@ -23,11 +23,6 @@ public abstract class CreateItemGroupBaseMixin implements CreativeModeTab.Displa
         throw new AssertionError();
     }
 
-    @Shadow @Final private boolean mainTab;
-
-    @Unique private final CreativeModeTab baseTab = AllCreativeModeTabs.getBaseTab();
-    @Unique private final CreativeModeTab palettesTab = AllCreativeModeTabs.getPalettesTab();
-
     @Redirect(method = "accept",
             at = @At(value = "INVOKE",
                     target = "Lcom/simibubi/create/AllCreativeModeTabs$RegistrateDisplayItemsGenerator;outputAll(Lnet/minecraft/world/item/CreativeModeTab$Output;Ljava/util/List;Ljava/util/function/Function;Ljava/util/function/Function;)V",
@@ -37,7 +32,7 @@ public abstract class CreateItemGroupBaseMixin implements CreativeModeTab.Displa
                 .CallBack
                 .EVENT
                 .invoker()
-                .interact(mainTab ? baseTab : palettesTab, output);
+                .interact(AllCreativeModeTabs.MAIN_TAB, output);
         outputAll(item, output, items, stackFunc);
     }
 }
