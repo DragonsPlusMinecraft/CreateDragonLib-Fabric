@@ -3,8 +3,10 @@ package plus.dragons.createdragonlib.event;
 import com.simibubi.create.AllCreativeModeTabs;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
@@ -73,7 +75,7 @@ public class FillCreateItemGroupEvent {
                     return InteractionResult.PASS;
                 });
 
-        InteractionResult interact(AllCreativeModeTabs.TabInfo itemGroup, List<Item> items);
+        InteractionResult interact(CreativeModeTab itemGroup, List<Item> items);
     }
 
 }

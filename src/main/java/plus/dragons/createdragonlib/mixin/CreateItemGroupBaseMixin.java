@@ -1,11 +1,14 @@
 package plus.dragons.createdragonlib.mixin;
 
 import com.simibubi.create.AllCreativeModeTabs;
+import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import plus.dragons.createdragonlib.event.FillCreateItemGroupEvent;
@@ -20,6 +23,11 @@ public abstract class CreateItemGroupBaseMixin implements CreativeModeTab.Displa
         throw new AssertionError();
     }
 
+    @Shadow @Final private boolean mainTab;
+
+    @Unique private final CreativeModeTab baseTab = AllCreativeModeTabs.getBaseTab();
+    @Unique private final CreativeModeTab palettesTab = AllCreativeModeTabs.getPalettesTab();
+
     @Redirect(method = "accept",
             at = @At(value = "INVOKE",
                     target = "Lcom/simibubi/create/AllCreativeModeTabs$RegistrateDisplayItemsGenerator;outputAll(Lnet/minecraft/world/item/CreativeModeTab$Output;Ljava/util/List;Ljava/util/function/Function;Ljava/util/function/Function;)V",
@@ -29,7 +37,7 @@ public abstract class CreateItemGroupBaseMixin implements CreativeModeTab.Displa
                 .CallBack
                 .EVENT
                 .invoker()
-                .interact((AllCreativeModeTabs.TabInfo) (Object) this, output);
+                .interact(mainTab ? baseTab : palettesTab, output);
         outputAll(item, output, items, stackFunc);
     }
 }
