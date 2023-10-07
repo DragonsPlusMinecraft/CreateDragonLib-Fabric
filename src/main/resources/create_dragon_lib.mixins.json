@@ -7,7 +7,6 @@
     "AdvancementBehaviourAccessor",
     "CreateAdvancementConstructor",
     "CreateAdvancementMixin",
-    "CreateItemGroupBaseMixin",
     "DataGeneratorAccessor",
     "FluidReactionsMixin"
   ],
