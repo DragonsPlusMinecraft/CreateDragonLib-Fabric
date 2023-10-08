@@ -22,6 +22,7 @@ SOFTWARE.
 
 import com.simibubi.create.AllTags;
 import com.simibubi.create.foundation.data.recipe.Mods;
+import com.simibubi.create.Create;
 import com.tterrag.registrate.builders.BlockBuilder;
 import com.tterrag.registrate.builders.ItemBuilder;
 import com.tterrag.registrate.providers.ProviderType;
@@ -34,7 +35,6 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluid;
-import plus.dragons.createdragonlib.init.SafeRegistrate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,13 +45,11 @@ import java.util.List;
 public class TagGen {
     private static final List<TagGen> READY_TO_GEN = new ArrayList<>();
 
-    private SafeRegistrate registrate;
     private final List<NonNullConsumer<RegistrateTagsProvider<Block>>> blockTagGen;
     private final List<NonNullConsumer<RegistrateTagsProvider<Fluid>>> fluidTagGen;
     private final List<NonNullConsumer<RegistrateTagsProvider<Item>>> itemTagGen;
 
-    private TagGen(SafeRegistrate registrate, List<NonNullConsumer<RegistrateTagsProvider<Block>>> blockTagGen, List<NonNullConsumer<RegistrateTagsProvider<Fluid>>> fluidTagGen, List<NonNullConsumer<RegistrateTagsProvider<Item>>> itemTagGen) {
-        this.registrate = registrate;
+    private TagGen(List<NonNullConsumer<RegistrateTagsProvider<Block>>> blockTagGen, List<NonNullConsumer<RegistrateTagsProvider<Fluid>>> fluidTagGen, List<NonNullConsumer<RegistrateTagsProvider<Item>>> itemTagGen) {
         this.blockTagGen = blockTagGen;
         this.fluidTagGen = fluidTagGen;
         this.itemTagGen = itemTagGen;
@@ -60,13 +58,13 @@ public class TagGen {
     public static void genAll() {
         for (var tagGen : READY_TO_GEN) {
             for (var c : tagGen.blockTagGen) {
-                tagGen.registrate.addDataGenerator(ProviderType.BLOCK_TAGS, c);
+                Create.REGISTRATE.addDataGenerator(ProviderType.BLOCK_TAGS, c);
             }
             for (var c : tagGen.itemTagGen) {
-                tagGen.registrate.addDataGenerator(ProviderType.ITEM_TAGS, c);
+                Create.REGISTRATE.addDataGenerator(ProviderType.ITEM_TAGS, c);
             }
             for (var c : tagGen.fluidTagGen) {
-                tagGen.registrate.addDataGenerator(ProviderType.FLUID_TAGS, c);
+                Create.REGISTRATE.addDataGenerator(ProviderType.FLUID_TAGS, c);
             }
         }
     }
@@ -76,14 +74,12 @@ public class TagGen {
     }
 
     public static class Builder {
-        private SafeRegistrate registrate;
         private final List<NonNullConsumer<RegistrateTagsProvider<Block>>> blockTagGen = new ArrayList<>();
         private final List<NonNullConsumer<RegistrateTagsProvider<Fluid>>> fluidTagGen = new ArrayList<>();
         private final List<NonNullConsumer<RegistrateTagsProvider<Item>>> itemTagGen = new ArrayList<>();
 
 
-        public Builder(SafeRegistrate registrate) {
-            this.registrate = registrate;
+        public Builder() {
         }
 
         public Builder addItemTagFactory(NonNullConsumer<RegistrateTagsProvider<Item>> consumer) {
@@ -102,7 +98,7 @@ public class TagGen {
         }
 
         public TagGen build() {
-            return new TagGen(registrate, blockTagGen, fluidTagGen, itemTagGen);
+            return new TagGen(blockTagGen, fluidTagGen, itemTagGen);
         }
     }
 
