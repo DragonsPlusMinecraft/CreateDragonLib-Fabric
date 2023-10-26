@@ -9,9 +9,12 @@ import com.google.gson.JsonObject;
 import com.simibubi.create.foundation.ponder.PonderScene;
 import com.simibubi.create.foundation.utility.FilesHelper;
 import net.minecraft.data.CachedOutput;
-import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
+import net.minecraft.data.PackOutput.PathProvider;
 import net.minecraft.data.DataProvider;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -19,7 +22,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
-import plus.dragons.createdragonlib.mixin.DataGeneratorAccessor;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -76,7 +78,7 @@ class LangMerger implements DataProvider {
     private final Map<String, MutableInt> existingButActuallyMissingTranslationTally = new HashMap<>();
 
     final List<LangPartial> partials = new ArrayList<>();
-    DataGenerator dataGenerator;
+    FabricDataOutput output;
     List<String> ignore = new ArrayList<>();
 
     LangMerger(String name, String modid) {
@@ -91,9 +93,8 @@ class LangMerger implements DataProvider {
 
     @Override
     public CompletableFuture<?> run(CachedOutput cache) {
-        Path path = ((DataGeneratorAccessor) this.dataGenerator).getRootOutputFolder()
-                .resolve("assets/" + modid + "/lang/" + "en_us.json");
-
+	Path path = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "lang")
+			.json(new ResourceLocation(modid, "en_us"));
 
         return CompletableFuture.runAsync(() -> {
             for(Pair<String, JsonElement> pair : getAllLocalizationFiles()) {
@@ -129,8 +130,8 @@ class LangMerger implements DataProvider {
                 save(cache, mergedLangData, -1, path, "Merging en_us.json with hand-written lang entries...");
                 for(Entry<String, List<Object>> localization : populatedLangData.entrySet()) {
                     String key = localization.getKey();
-                    Path populatedLangPath = ((DataGeneratorAccessor) this.dataGenerator).getRootOutputFolder()
-                            .resolve("assets/" + modid + "/lang/unfinished/" + key);
+                    Path populatedLangPath = output.createPathProvider(PackOutput.Target.RESOURCE_PACK, "lang/unfinished")
+			    .json(new ResourceLocation(modid, key.substring(0, key.lastIndexOf("."))));
                     save(cache, localization.getValue(),
                             missingTranslationTally.get(key).intValue() + existingButActuallyMissingTranslationTally.get(key).intValue(),
                             populatedLangPath, "Populating " + key + " with missing entries...");

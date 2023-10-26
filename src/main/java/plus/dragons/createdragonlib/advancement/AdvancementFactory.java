@@ -1,20 +1,22 @@
 package plus.dragons.createdragonlib.advancement;
 
 import com.simibubi.create.foundation.advancement.AllAdvancements;
-import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
-import net.minecraft.data.PackOutput;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator.Pack;
+import net.fabricmc.fabric.api.datagen.v1.FabricDataOutput;
 import plus.dragons.createdragonlib.advancement.critereon.TriggerFactory;
 
 public class AdvancementFactory {
     private final String modid;
-    private final AdvancementGen advancementGen;
     private final TriggerFactory triggerFactory = new TriggerFactory();
     private final Runnable preTask;
+    private final String name;
+    private final AdvancementGen advancementGen;
 
     private AdvancementFactory(String name, String modid, Runnable preTask) {
+        this.name = name;
         this.modid = modid;
-        this.advancementGen = new AdvancementGen(name, modid);
         this.preTask = preTask;
+        this.advancementGen = new AdvancementGen(name, modid);
     }
 
     public static AdvancementFactory create(String name, String modid, Runnable preTask) {
@@ -29,11 +31,12 @@ public class AdvancementFactory {
         return triggerFactory;
     }
 
-    public void datagen(final FabricDataGenerator datagen) {
+    public void datagen(final Pack pack) {
         preTask.run();
-        advancementGen.generator = datagen;
-        FabricDataGenerator.Pack pack = datagen.createPack();
-        pack.addProvider((PackOutput output) -> advancementGen);
+        pack.addProvider((FabricDataOutput output) -> {
+            advancementGen.output = output;
+            return advancementGen;
+        });
     }
 
     public void register() {
