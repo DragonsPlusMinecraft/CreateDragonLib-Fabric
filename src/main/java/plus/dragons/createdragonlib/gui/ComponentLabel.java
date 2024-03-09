@@ -106,7 +106,7 @@ public class ComponentLabel extends Label {
     }
 
     @Override
-    public void renderButton(@Nonnull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+    public void renderWidget(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         if (text == null)
             return;
         RenderSystem.setShaderColor(1, 1, 1, 1);
